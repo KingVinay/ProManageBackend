@@ -28,6 +28,12 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Middleware for Error
+app.use((error, req, res, next) => {
+  console.log(error);
+  res.status(500).json({ errorMessage: "Something went wrong!" });
+});
+
 app.listen(PORT, () => {
   console.log(`ProManage Server is running on port ${PORT}`);
 });
