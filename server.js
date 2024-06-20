@@ -9,6 +9,8 @@ const PORT = process.env.PORT || 4000;
 const cors = require("cors");
 app.use(cors());
 
+const authRoute = require("./Routes/auth");
+
 // express parser
 app.use(express.json());
 
@@ -27,6 +29,9 @@ app.get("/api/health", (req, res) => {
     time: new Date(),
   });
 });
+
+// Middleware
+app.use("/api/auth", authRoute);
 
 // Middleware for Error
 app.use((error, req, res, next) => {
