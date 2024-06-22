@@ -10,6 +10,7 @@ const cors = require("cors");
 app.use(cors());
 
 const authRoute = require("./Routes/auth");
+const taskRoute = require("./Routes/task");
 
 // express parser
 app.use(express.json());
@@ -32,6 +33,7 @@ app.get("/api/health", (req, res) => {
 
 // Middleware
 app.use("/api/auth", authRoute);
+app.use("/api/task", taskRoute);
 
 // Middleware for Error
 app.use((error, req, res, next) => {

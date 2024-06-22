@@ -20,7 +20,7 @@ const taskSchema = new mongoose.Schema(
     priority: {
       type: String,
       enum: ["low", "moderate", "high"],
-      default: "low",
+      required: true,
     },
     assignPerson: {
       type: String,
@@ -35,6 +35,11 @@ const taskSchema = new mongoose.Schema(
       type: Date,
     },
     checklist: [checklistItemSchema],
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     shareableLink: {
       type: String,
     },
