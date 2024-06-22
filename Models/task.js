@@ -35,6 +35,9 @@ const taskSchema = new mongoose.Schema(
       type: Date,
     },
     checklist: [checklistItemSchema],
+    shareableLink: {
+      type: String,
+    },
   },
   {
     timestamps: { createdAt: "createdAt", updatedAt: "updatedAt" },

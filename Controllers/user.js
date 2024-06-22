@@ -79,4 +79,35 @@ const loginUser = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+const addEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const userId = req.userId;
+    if (!email) {
+      return res
+        .status(400)
+        .json({ errorMessage: "Bad Request! : Enter valid email" });
+    }
+
+    const userDetails = await User.findById(userId);
+    if (!userDetails) {
+      return res.status(401).json({ errorMessage: "User Doesn't Exist!" });
+    }
+
+    const isExistingEmail = userDetails.addPeople.some(
+      (data) => data.email === email
+    );
+
+    if (isExistingEmail) {
+      return res.status(409).json({ errorMessage: "Email already exists!" });
+    }
+
+    userDetails.addPeople.push({ email });
+    await userDetails.save();
+    res.json({ message: "Email Added Successfully!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { registerUser, loginUser, addEmail };
