@@ -24,7 +24,6 @@ const taskSchema = new mongoose.Schema(
     },
     assignPerson: {
       type: String,
-      unique: true,
     },
     taskSection: {
       type: String,
@@ -34,7 +33,7 @@ const taskSchema = new mongoose.Schema(
     dueDate: {
       type: Date,
     },
-    checklist: [checklistItemSchema],
+    checklists: [checklistItemSchema],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
