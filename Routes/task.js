@@ -21,4 +21,8 @@ router.get("/taskAnalytics", verifyToken, taskController.getTaskAnalytics);
 
 router.get("/taskById/:taskId", verifyToken, taskController.getTaskById);
 
+router.get("/all", verifyToken, taskController.getAllTasks);
+
+router.get("/filteredTasks", verifyToken, taskController.getFilteredTasks);
+
 module.exports = router;

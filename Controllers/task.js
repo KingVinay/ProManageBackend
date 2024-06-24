@@ -230,6 +230,131 @@ const getTaskById = async (req, res, next) => {
   }
 };
 
+const getAllTasks = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+
+    // Get the current date and the date 7 days ago
+    const now = new Date();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(now.getDate() - 7);
+
+    // Fetch tasks created by the user within the last 7 days and sort by createdAt
+    const tasks = await Task.find({
+      createdBy: userId,
+      createdAt: { $gte: sevenDaysAgo, $lte: now },
+    }).sort({ createdAt: -1 });
+
+    const todoTasks = [];
+    const inProgressTasks = [];
+    const backlogTasks = [];
+    const completedTasks = [];
+
+    // Categorize tasks by taskSection
+    tasks.forEach((task) => {
+      switch (task.taskSection) {
+        case "todo":
+          todoTasks.push(task);
+          break;
+        case "in progress":
+          inProgressTasks.push(task);
+          break;
+        case "backlog":
+          backlogTasks.push(task);
+          break;
+        case "completed":
+          completedTasks.push(task);
+          break;
+        default:
+          break;
+      }
+    });
+
+    // Prepare response
+    const sortedTasks = {
+      todoTasks,
+      inProgressTasks,
+      backlogTasks,
+      completedTasks,
+    };
+
+    res.json(sortedTasks);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getFilteredTasks = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const { period } = req.body;
+
+    const now = new Date();
+    let startDate;
+
+    switch (period) {
+      case "today":
+        startDate = new Date(now);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "week":
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case "month":
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 30);
+        break;
+      default:
+        return res
+          .status(400)
+          .json({ errorMessage: "Invalid period specified" });
+    }
+
+    // Fetch tasks created by the user within the specified period and sort by createdAt
+    const tasks = await Task.find({
+      createdBy: userId,
+      createdAt: { $gte: startDate, $lte: now },
+    }).sort({ createdAt: -1 });
+
+    const todoTasks = [];
+    const inProgressTasks = [];
+    const backlogTasks = [];
+    const completedTasks = [];
+
+    // Categorize tasks by taskSection
+    tasks.forEach((task) => {
+      switch (task.taskSection) {
+        case "todo":
+          todoTasks.push(task);
+          break;
+        case "in progress":
+          inProgressTasks.push(task);
+          break;
+        case "backlog":
+          backlogTasks.push(task);
+          break;
+        case "completed":
+          completedTasks.push(task);
+          break;
+        default:
+          break;
+      }
+    });
+
+    const filteredTasks = {
+      todoTasks,
+      inProgressTasks,
+      backlogTasks,
+      completedTasks,
+    };
+
+    res.json(filteredTasks);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   addTask,
   editTask,
@@ -238,4 +363,5 @@ module.exports = {
   updateTaskSection,
   getTaskAnalytics,
   getTaskById,
+  getAllTasks,
 };
