@@ -117,4 +117,125 @@ const shareTask = async (req, res, next) => {
   }
 };
 
-module.exports = { addTask, editTask, deleteTask, shareTask };
+const updateTaskSection = async (req, res, next) => {
+  try {
+    const { taskId } = req.params;
+    const { taskSection } = req.body;
+
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ errorMessage: "Task not found" });
+    }
+
+    task.taskSection = taskSection;
+    const updatedTask = await task.save();
+
+    res.json({ message: "Task section updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getTaskAnalytics = async (req, res, next) => {
+  try {
+    // Fetch all tasks created by the user
+    const tasks = await Task.find({ createdBy: userId });
+
+    // Initialize counters
+    const taskSections = {
+      todo: 0,
+      inProgress: 0,
+      backlog: 0,
+      completed: 0,
+    };
+
+    const priorities = {
+      low: 0,
+      moderate: 0,
+      high: 0,
+    };
+
+    const dueDate = 0;
+
+    // Traverse through tasks and count based on properties
+    tasks.forEach((task) => {
+      // Count task sections
+      switch (task.taskSection) {
+        case "todo":
+          taskSections.todo += 1;
+          break;
+        case "in progress":
+          taskSections.inProgress += 1;
+          break;
+        case "backlog":
+          taskSections.backlog += 1;
+          break;
+        case "completed":
+          taskSections.completed += 1;
+          break;
+        default:
+          break;
+      }
+
+      // Count priorities
+      switch (task.priority) {
+        case "low":
+          priorities.low += 1;
+          break;
+        case "moderate":
+          priorities.moderate += 1;
+          break;
+        case "high":
+          priorities.high += 1;
+          break;
+        default:
+          break;
+      }
+
+      // Check for due date
+      if (task.dueDate) {
+        dueDateTasks += 1;
+      }
+    });
+
+    const analytics = {
+      taskSections,
+      priorities,
+      dueDateTasks,
+    };
+
+    res.json({ message: "Task Analysis Completed", analytics });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getTaskById = async (req, res, next) => {
+  try {
+    const { taskId } = req.params;
+
+    if (!taskId) {
+      return res.status(400).json({ errorMessage: "Task Id is required!" });
+    }
+
+    const task = await task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({ errorMessage: "Task not found!" });
+    }
+
+    res.json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  addTask,
+  editTask,
+  deleteTask,
+  shareTask,
+  updateTaskSection,
+  getTaskAnalytics,
+  getTaskById,
+};
