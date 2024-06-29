@@ -364,4 +364,5 @@ module.exports = {
   getTaskAnalytics,
   getTaskById,
   getAllTasks,
+  getFilteredTasks,
 };

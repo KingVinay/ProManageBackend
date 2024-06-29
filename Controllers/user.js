@@ -62,6 +62,7 @@ const loginUser = async (req, res, next) => {
     const token = jwt.sign(
       {
         userId: userDetails._id,
+        name: userDetails.name,
         email: userDetails.email,
       },
       process.env.SECRET_CODE,
@@ -110,4 +111,64 @@ const addEmail = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser, addEmail };
+const updateCredentials = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const { name, email, oldPassword, newPassword } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ errorMessage: "User not found" });
+    }
+
+    let updatedFields = {};
+    if (name) {
+      if (name !== user.name) {
+        updatedFields.name = name;
+      } else {
+        return res
+          .status(400)
+          .json({ errorMessage: "Name can't be same as Before!" });
+      }
+    }
+    if (email) {
+      if (email !== user.email) {
+        const emailExists = await User.findOne({ email });
+        if (emailExists) {
+          return res.status(400).json({ errorMessage: "Email already exists" });
+        }
+        updatedFields.email = email;
+      } else {
+        return res
+          .status(400)
+          .json({ errorMessage: "Email can't be same as Before!" });
+      }
+    }
+    if (oldPassword && newPassword) {
+      if (oldPassword !== newPassword) {
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+          return res
+            .status(400)
+            .json({ errorMessage: "Old password is incorrect" });
+        }
+        updatedFields.password = await bcrypt.hash(newPassword, 10);
+      } else {
+        return res
+          .status(400)
+          .json({ errorMessage: "Old and New Password cannot be Equal!" });
+      }
+    }
+
+    await User.findByIdAndUpdate(
+      userId,
+      { $set: updatedFields },
+      { new: true }
+    );
+    res.json({ message: "Credentials updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { registerUser, loginUser, addEmail, updateCredentials };

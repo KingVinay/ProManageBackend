@@ -6,5 +6,10 @@ const verifyToken = require("../Middlewares/verifyToken");
 router.post("/register", authController.registerUser);
 router.post("/login", authController.loginUser);
 router.post("/addEmail", verifyToken, authController.addEmail);
+router.patch(
+  "/updateCredentials",
+  verifyToken,
+  authController.updateCredentials
+);
 
 module.exports = router;

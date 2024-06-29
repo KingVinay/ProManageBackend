@@ -19,7 +19,7 @@ router.patch(
 
 router.get("/taskAnalytics", verifyToken, taskController.getTaskAnalytics);
 
-router.get("/taskById/:taskId", verifyToken, taskController.getTaskById);
+router.get("/taskById/:taskId", taskController.getTaskById);
 
 router.get("/all", verifyToken, taskController.getAllTasks);
 
