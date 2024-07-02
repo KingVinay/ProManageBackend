@@ -17,11 +17,15 @@ router.patch(
   taskController.updateTaskSection
 );
 
+router.patch(
+  "/updateChecklistChecked/:taskId",
+  verifyToken,
+  taskController.updateChecklistChecked
+);
+
 router.get("/taskAnalytics", verifyToken, taskController.getTaskAnalytics);
 
 router.get("/taskById/:taskId", taskController.getTaskById);
-
-router.get("/all", verifyToken, taskController.getAllTasks);
 
 router.get("/filteredTasks", verifyToken, taskController.getFilteredTasks);
 

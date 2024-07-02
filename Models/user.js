@@ -17,9 +17,8 @@ const userSchema = new mongoose.Schema(
     },
     addPeople: [
       {
-        email: {
+        addEmail: {
           type: String,
-          unique: true,
         },
       },
     ],

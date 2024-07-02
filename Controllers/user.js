@@ -96,14 +96,14 @@ const addEmail = async (req, res, next) => {
     }
 
     const isExistingEmail = userDetails.addPeople.some(
-      (data) => data.email === email
+      (data) => data.addEmail === email
     );
 
     if (isExistingEmail) {
       return res.status(409).json({ errorMessage: "Email already exists!" });
     }
 
-    userDetails.addPeople.push({ email });
+    userDetails.addPeople.push({ addEmail: email });
     await userDetails.save();
     res.json({ message: "Email Added Successfully!" });
   } catch (error) {

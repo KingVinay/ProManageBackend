@@ -120,14 +120,14 @@ const shareTask = async (req, res, next) => {
 const updateTaskSection = async (req, res, next) => {
   try {
     const { taskId } = req.params;
-    const { taskSection } = req.body;
+    const { newSection } = req.body;
 
     const task = await Task.findById(taskId);
     if (!task) {
       return res.status(404).json({ errorMessage: "Task not found" });
     }
 
-    task.taskSection = taskSection;
+    task.taskSection = newSection;
     const updatedTask = await task.save();
 
     res.json({ message: "Task section updated successfully" });
@@ -136,26 +136,56 @@ const updateTaskSection = async (req, res, next) => {
   }
 };
 
+const updateChecklistChecked = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { checklistId, checked } = req.body;
+
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ errorMessage: "Task not found" });
+    }
+
+    const checklistItem = task.checklists.id(checklistId);
+    if (!checklistItem) {
+      return res.status(404).json({ errorMessage: "Checklist item not found" });
+    }
+
+    checklistItem.checked = checked;
+    await task.save();
+
+    res.status(200).json({ message: "Checklist item updated successfully!" });
+  } catch (error) {
+    console.error("Error updating checklist item:", error);
+    res.status(500).json({ errorMessage: "Internal server error" });
+  }
+};
+
 const getTaskAnalytics = async (req, res, next) => {
   try {
     // Fetch all tasks created by the user
-    const tasks = await Task.find({ createdBy: userId });
+    const userId = req.userId;
+    const userEmail = req.email;
+
+    const tasks = await Task.find({
+      $or: [{ createdBy: userId }, { assignPerson: userEmail }],
+    });
 
     // Initialize counters
-    const taskSections = {
+    var taskSections = {
       todo: 0,
       inProgress: 0,
       backlog: 0,
       completed: 0,
     };
 
-    const priorities = {
+    var priorities = {
       low: 0,
       moderate: 0,
       high: 0,
     };
 
-    const dueDate = 0;
+    var dueDateTasks = 0;
 
     // Traverse through tasks and count based on properties
     tasks.forEach((task) => {
@@ -230,69 +260,16 @@ const getTaskById = async (req, res, next) => {
   }
 };
 
-const getAllTasks = async (req, res, next) => {
-  try {
-    const userId = req.userId;
-
-    // Get the current date and the date 7 days ago
-    const now = new Date();
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(now.getDate() - 7);
-
-    // Fetch tasks created by the user within the last 7 days and sort by createdAt
-    const tasks = await Task.find({
-      createdBy: userId,
-      createdAt: { $gte: sevenDaysAgo, $lte: now },
-    }).sort({ createdAt: -1 });
-
-    const todoTasks = [];
-    const inProgressTasks = [];
-    const backlogTasks = [];
-    const completedTasks = [];
-
-    // Categorize tasks by taskSection
-    tasks.forEach((task) => {
-      switch (task.taskSection) {
-        case "todo":
-          todoTasks.push(task);
-          break;
-        case "in progress":
-          inProgressTasks.push(task);
-          break;
-        case "backlog":
-          backlogTasks.push(task);
-          break;
-        case "completed":
-          completedTasks.push(task);
-          break;
-        default:
-          break;
-      }
-    });
-
-    // Prepare response
-    const sortedTasks = {
-      todoTasks,
-      inProgressTasks,
-      backlogTasks,
-      completedTasks,
-    };
-
-    res.json(sortedTasks);
-  } catch (error) {
-    next(error);
-  }
-};
-
 const getFilteredTasks = async (req, res, next) => {
   try {
     const userId = req.userId;
-    const { period } = req.body;
+    const userEmail = req.email;
+    const { filter } = req.query;
 
     const now = new Date();
     let startDate;
 
-    switch (period) {
+    switch (filter) {
       case "today":
         startDate = new Date(now);
         startDate.setHours(0, 0, 0, 0);
@@ -308,12 +285,11 @@ const getFilteredTasks = async (req, res, next) => {
       default:
         return res
           .status(400)
-          .json({ errorMessage: "Invalid period specified" });
+          .json({ errorMessage: "Invalid filter specified" });
     }
 
-    // Fetch tasks created by the user within the specified period and sort by createdAt
     const tasks = await Task.find({
-      createdBy: userId,
+      $or: [{ createdBy: userId }, { assignPerson: userEmail }],
       createdAt: { $gte: startDate, $lte: now },
     }).sort({ createdAt: -1 });
 
@@ -361,8 +337,8 @@ module.exports = {
   deleteTask,
   shareTask,
   updateTaskSection,
+  updateChecklistChecked,
   getTaskAnalytics,
   getTaskById,
-  getAllTasks,
   getFilteredTasks,
 };
