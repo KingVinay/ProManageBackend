@@ -11,5 +11,6 @@ router.patch(
   verifyToken,
   authController.updateCredentials
 );
+router.get("/addedPeople", verifyToken, authController.addedPeople);
 
 module.exports = router;

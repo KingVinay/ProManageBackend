@@ -111,6 +111,23 @@ const addEmail = async (req, res, next) => {
   }
 };
 
+const addedPeople = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+
+    // Find the user by ID and select only the addedPeople field
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user.addPeople);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updateCredentials = async (req, res, next) => {
   try {
     const userId = req.userId;
@@ -171,4 +188,10 @@ const updateCredentials = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser, addEmail, updateCredentials };
+module.exports = {
+  registerUser,
+  loginUser,
+  addEmail,
+  addedPeople,
+  updateCredentials,
+};

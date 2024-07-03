@@ -2,7 +2,7 @@ const Task = require("../Models/task");
 
 const addTask = async (req, res, next) => {
   try {
-    const { title, priority, assignPerson, dueDate, checklists } = req.body;
+    const { title, priority, assignedPerson, dueDate, checklists } = req.body;
 
     if (!title || !priority || !checklists || checklists.length === 0) {
       return res.status(400).json({ errorMessage: "All fields are required" });
@@ -21,7 +21,7 @@ const addTask = async (req, res, next) => {
     const task = new Task({
       title,
       priority,
-      assignPerson,
+      assignPerson: assignedPerson,
       dueDate,
       checklists,
       createdBy,
@@ -35,7 +35,7 @@ const addTask = async (req, res, next) => {
     savedTask.shareableLink = shareableLink;
     await savedTask.save();
 
-    res.status(201).json({ message: "Task added successfully" });
+    res.json({ message: "Task added successfully", savedTask });
   } catch (error) {
     next(error);
   }
