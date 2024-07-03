@@ -76,7 +76,7 @@ const editTask = async (req, res, next) => {
 
     const updatedTask = await task.save();
 
-    res.json({ message: "Task updated successfully" });
+    res.json({ message: "Task updated successfully", updatedTask });
   } catch (error) {
     next(error);
   }
@@ -248,7 +248,7 @@ const getTaskById = async (req, res, next) => {
       return res.status(400).json({ errorMessage: "Task Id is required!" });
     }
 
-    const task = await task.findById(taskId);
+    const task = await Task.findById(taskId);
 
     if (!task) {
       return res.status(404).json({ errorMessage: "Task not found!" });
